@@ -1,0 +1,58 @@
+class LRUCache: 
+    # always clear before ptr even if you always move head to right
+    # cuz you might later heave logic on prev of head and it will backfire
+
+    def __init__(self, capacity: int):
+        self.cache = {}
+        self.head = None
+        self.tail = None
+        self.k = capacity
+
+    def makeMRU(self, node):
+        before = node.prev
+        after = node.next
+        node.next = None
+        node.prev = self.tail
+        self.tail.next = node
+        self.tail = node
+        if before:
+            before.next = after
+        else:
+            self.head = after
+        if after:
+            after.prev = before
+
+    def get(self, key: int) -> int:
+        if key in self.cache:
+            node = self.cache[key]
+            if self.tail and self.tail.key != key: # move node to tail
+                self.makeMRU(node)
+            return node.val
+        return -1
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.cache: # update
+            node = self.cache[key]
+            if self.tail and self.tail.key != key: # move node to tail
+                self.makeMRU(node)
+            node.val = value        
+        else: # insert
+            self.tail = ListNode(self.tail, key, value, None)
+            if self.tail.prev:
+                self.tail.prev.next = self.tail
+            self.cache[key] = self.tail
+            if len(self.cache) > self.k: # pop head
+                self.cache.pop(self.head.key)
+                self.head = self.head.next
+                if self.head:
+                    self.head.prev = None 
+            if len(self.cache) == 1:
+                self.head = self.tail
+
+class ListNode:
+
+    def __init__(self, prev=None, key=0, val=0, next=None):
+        self.prev = prev
+        self.key = key
+        self.val = val
+        self.next = next
