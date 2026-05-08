@@ -27,7 +27,12 @@ jobs:
       - name: Update README and commit
         run: |
           COUNT=${{ steps.count.outputs.count }}
+          echo "Count is: $COUNT"
+          echo "README before:"
+          cat README.md
           perl -i -0pe "s|<!-- NEETCODE_START -->.*?<!-- NEETCODE_END -->|<!-- NEETCODE_START -->\n[![NeetCode](https://img.shields.io/badge/NeetCode-${COUNT}%20%2F%20150-7B2FBE?style=for-the-badge)](https://github.com/umairansar/neetcode-submissions/tree/main)\n<!-- NEETCODE_END -->|s" README.md
+          echo "README after:"
+          cat README.md
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
