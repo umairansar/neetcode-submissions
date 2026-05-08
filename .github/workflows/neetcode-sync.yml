@@ -1,0 +1,35 @@
+name: NeetCode Progress Sync
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  neetcode-progress-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout neetcode-submissions
+        uses: actions/checkout@v4
+
+      - name: Count solved problems
+        id: count
+        run: |
+          COUNT=$(find "Data Structures & Algorithms/" -maxdepth 1 -type d | wc -l)
+          COUNT=$((COUNT - 1))
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+
+      - name: Checkout umairansar profile repo
+        uses: actions/checkout@v4
+        with:
+          repository: umairansar/umairansar
+          token: ${{ secrets.NEETCODE_PAT }}
+
+      - name: Update README and commit
+        run: |
+          COUNT=${{ steps.count.outputs.count }}
+          sed -i "s|<!-- NEETCODE_START -->.*<!-- NEETCODE_END -->|<!-- NEETCODE_START -->\n[![NeetCode](https://img.shields.io/badge/NeetCode-${COUNT}%20%2F%20150-7B2FBE?style=for-the-badge)](https://github.com/umairansar/neetcode-submissions/tree/main)\n<!-- NEETCODE_END -->|" README.md
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --cached --quiet || git commit -m "chore: update NeetCode count to $COUNT"
+          git push
